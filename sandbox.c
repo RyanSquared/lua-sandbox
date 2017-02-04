@@ -1,5 +1,18 @@
 #include "sandbox.h"
 
+int sandbox_pusherror(lua_State *L, int value) {
+	if (value == -1) {
+		int error = errno;
+		lua_pushboolean(L, false);
+		lua_pushinteger(L, error);
+		lua_pushstring(L, strerror(error));
+		return 3;
+	} else {
+		lua_pushinteger(L, value);
+		return 1;
+	}
+}
+
 int sandbox_protect(lua_State *L) {
 	prctl(PR_SET_NO_NEW_PRIVS, true); // disable privilege escalation
 
@@ -21,27 +34,26 @@ int sandbox_protect(lua_State *L) {
 	return 0;
 }
 
+int sandbox_kill(lua_State *L) {
+	int pid = luaL_checkinteger(L, 1);
+	int signal = luaL_checkinteger(L, 2);
+	return sandbox_pusherror(L, kill(pid, signal));
+}
+
 int sandbox_fork(lua_State *L) {
-	pid_t result = fork();
-	if (result == -1) {
-		int error = errno;
-		lua_pushboolean(L, false);
-		lua_pushinteger(L, error);
-		lua_pushstring(L, strerror(error));
-		return 3;
-	} else {
-		lua_pushinteger(L, result);
-		return 1;
-	}
+	return sandbox_pusherror(L, fork());
 }
 
 luaL_Reg sandbox[] = {
 	{"protect", sandbox_protect},
+	{"kill", sandbox_kill},
 	{"fork", sandbox_fork},
 	{NULL, NULL}
 };
 
 int luaopen_sandbox(lua_State *L) {
 	luaL_newlib(L, sandbox);
+	SETF("SIGKILL", SIGKILL);
+	SETF("SIGTERM", SIGTERM);
 	return 1;
 }
