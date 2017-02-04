@@ -1,5 +1,4 @@
 #include "sandbox.h"
-#include <stdio.h>
 
 int sandbox_protect(lua_State *L) {
 	prctl(PR_SET_NO_NEW_PRIVS, true); // disable privilege escalation
@@ -22,8 +21,23 @@ int sandbox_protect(lua_State *L) {
 	return 0;
 }
 
+int sandbox_fork(lua_State *L) {
+	pid_t result = fork();
+	if (result == -1) {
+		int error = errno;
+		lua_pushboolean(L, false);
+		lua_pushinteger(L, error);
+		lua_pushstring(L, strerror(error));
+		return 3;
+	} else {
+		lua_pushinteger(L, result);
+		return 1;
+	}
+}
+
 luaL_Reg sandbox[] = {
 	{"protect", sandbox_protect},
+	{"fork", sandbox_fork},
 	{NULL, NULL}
 };
 
