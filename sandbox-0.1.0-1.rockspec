@@ -1,0 +1,15 @@
+package = "sandbox"
+version = "0.1.0-1"
+source = {
+	url = "..."
+}
+build = {
+	type = "builtin",
+	modules = {
+		sandbox = {
+			sources = {"sandbox.c"},
+			defines = {},
+			libraries = {}
+		}
+	}
+}
