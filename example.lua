@@ -22,6 +22,8 @@ if pid ~= 0 then -- parent, send to child queue
 		end
 	end
 else
+	cqueues.sleep(0) -- load auxilliary library before protecting
+	sandbox.protect()
 	print(parent:read())
 	for i=1, 1 do
 		cqueues.sleep(1)
