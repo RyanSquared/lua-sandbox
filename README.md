@@ -18,7 +18,7 @@ W, R = 1, 2
 
 pid = sandbox.fork()
 if pid ~= 0 then -- parent, send to child queue
-	sockets.child[W]:write("message")
+	sockets.child[W]:write("message\n")
 	local cq = cqueues.new()
 	local is_dead = false
 	cq:wrap(function()
@@ -26,7 +26,7 @@ if pid ~= 0 then -- parent, send to child queue
 		print('received:', sockets.parent[R]:read())
 		is_dead = true
 	end)
-	cq:loop(3)
+	cq:loop(6)
 	if not is_dead then
 		print('terminating')
 		if not sandbox.kill(pid, sandbox.SIGTERM) then
@@ -39,5 +39,6 @@ else
 	for i=1, 5 do
 		cqueues.sleep(1)
 	end
+	sockets.parent[W]:write("msg\n")
 end
 ```
