@@ -7,9 +7,8 @@ build = {
 	type = "builtin",
 	modules = {
 		sandbox = {
-			sources = {"sandbox.c"},
-			defines = {},
-			libraries = {}
-		}
+			sources = {"sandbox.c"}
+		};
+		["sandbox.cqueues"] = "cqueues/init.lua";
 	}
 }
